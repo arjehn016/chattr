@@ -74,7 +74,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <p className="text-xs text-cyan-400 font-mono">
                 {currentUser.username} • {currentUser.hidePhone ? 'Gizli Numara' : currentUser.phone}
               </p>
-              <p className="text-xs text-slate-400 mt-1 line-clamp-1">{currentUser.about || 'SohbetApp kullanıyorum.'}</p>
+              <p className="text-xs text-slate-400 mt-1 line-clamp-1">{currentUser.about || 'ChatTR kullanıyorum.'}</p>
             </div>
           </div>
           <ChevronRight className="w-5 h-5 text-slate-500" />

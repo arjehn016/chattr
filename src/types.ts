@@ -3,12 +3,13 @@ export type AppViewMode = 'frame' | 'responsive';
 export type ActiveTab = 'chats' | 'nearby' | 'status' | 'calls' | 'settings' | 'emergency';
 
 export type AppTheme =
-  | 'cyber_neon'       // Deep obsidian + electric cyan/neon emerald
-  | 'synthwave_pink'   // Deep violet + hot magenta pink neon
-  | 'nordic_cobalt'    // Midnight navy + electric cobalt & ice
-  | 'matrix_emerald'   // Deep charcoal + luminous neon lime/emerald
-  | 'solar_amber'      // Deep volcanic onyx + radiant golden amber & neon orange
-  | 'minimal_pearl';   // Sleek pearl light + modern graphite
+  | 'cyber_neon'
+  | 'emerald_matrix'
+  | 'synthwave_pink'
+  | 'nordic_cobalt'
+  | 'matrix_emerald'
+  | 'solar_amber'
+  | 'minimal_pearl';
 
 export type PhonePrivacySetting = 'everyone' | 'contacts' | 'hidden';
 export type LocationPermissionState = 'not_prompted' | 'granted' | 'denied';
@@ -26,8 +27,8 @@ export interface EmergencyBroadcast {
   batteryPercent: number;
   bloodType: string;
   timestamp: string;
-  hopCount: number; // Mesh jump count e.g. 1 (direct peer) or 2 (relayed)
-  signalStrength: number; // percentage
+  hopCount: number;
+  signalStrength: number;
   distanceMeters: number;
 }
 
@@ -45,14 +46,15 @@ export interface MeshPeer {
 export interface User {
   id: string;
   name: string;
-  username: string; // e.g. "ercan_y" without @ in data, displayed with @
-  phone: string; // e.g. "+90 532 987 6543"
-  hidePhone: boolean; // if true, others only see username
+  username: string;
+  phone: string;
+  hidePhone: boolean;
   phonePrivacy: PhonePrivacySetting;
   lastSeenPrivacy: 'everyone' | 'contacts' | 'nobody';
   readReceipts: boolean;
   avatar: string;
   bio: string;
+  about?: string;
   isOnline: boolean;
   lastSeenTime: string;
   isNearbyVisible?: boolean;
@@ -82,12 +84,12 @@ export interface Message {
   chatId: string;
   senderId: string;
   text: string;
-  timestamp: string; // e.g. "14:32"
+  timestamp: string;
   fullDate?: string;
   status: MessageStatus;
   type: MessageType;
   mediaUrl?: string;
-  audioDuration?: number; // in seconds
+  audioDuration?: number;
   fileName?: string;
   fileSize?: string;
   replyTo?: {
@@ -108,7 +110,7 @@ export interface Chat {
   isPinned: boolean;
   isArchived: boolean;
   isMuted: boolean;
-  mutedUntil?: string; // e.g. "8 saat" | "1 hafta" | "Her zaman"
+  mutedUntil?: string;
   isBlocked: boolean;
   disappearingMessages: 'off' | '24h' | '7d' | '90d';
   lastMessage?: Message;

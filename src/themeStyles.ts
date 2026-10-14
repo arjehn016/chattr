@@ -1,65 +1,145 @@
-import { AppTheme } from './types';
+export type DeviceOS = 'apple' | 'android';
+export type AppViewMode = 'frame' | 'responsive';
+export type ActiveTab = 'chats' | 'nearby' | 'status' | 'calls' | 'settings' | 'emergency';
 
-export interface ThemeConfig {
-  name: string;
-  bgMain: string;          // Ana arka plan (derin siyah/lacivert)
-  bgSidebar: string;       // Sol panel arka planı
-  bgChat: string;          // Sohbet ekranı arka planı
-  cardMe: string;          // Sizin mesaj balonunuz (Canlı Turkuaz/Mavi tonu)
-  cardOther: string;       // Karşı tarafın mesaj balonu (Koyu şık gri/mor)
-  textPrimary: string;     // Ana yazı rengi (Saf beyaz / açık gri)
-  textSecondary: string;   // İkincil yazı rengi
-  accent: string;          // Vurgu rengi (Mor/Turkuaz)
-  border: string;          // Kenar çizgileri
+export type AppTheme =
+  | 'cyber_neon'
+  | 'emerald_matrix'
+  | 'synthwave_pink'
+  | 'nordic_cobalt'
+  | 'matrix_emerald'
+  | 'solar_amber'
+  | 'minimal_pearl';
+
+export type PhonePrivacySetting = 'everyone' | 'contacts' | 'hidden';
+export type LocationPermissionState = 'not_prompted' | 'granted' | 'denied';
+
+export type EmergencyStatus = 'safe' | 'need_help' | 'under_rubble' | 'medical_needed';
+
+export interface EmergencyBroadcast {
+  id: string;
+  senderId: string;
+  senderName: string;
+  username: string;
+  status: EmergencyStatus;
+  message: string;
+  coordinates: string;
+  batteryPercent: number;
+  bloodType: string;
+  timestamp: string;
+  hopCount: number;
+  signalStrength: number;
+  distanceMeters: number;
 }
 
-export const THEMES: Record<AppTheme, ThemeConfig> = {
-  cyber_neon: {
-    name: "Modern Turkuaz & Mor",
-    bgMain: "#0d1117",
-    bgSidebar: "#161b22",
-    bgChat: "#0d1117",
-    cardMe: "#00b4d8",     // Şık Turkuaz
-    cardOther: "#21262d",  // Koyu modern gri
-    textPrimary: "#f0f6fc",
-    textSecondary: "#8b949e",
-    accent: "#7209b7",     // Derin Mor
-    border: "#30363d"
-  },
-  emerald_matrix: {
-    name: "Derin Mavi & Mor Gece",
-    bgMain: "#0b132b",
-    bgSidebar: "#1c2541",
-    bgChat: "#0b132b",
-    cardMe: "#4361ee",     // Canlı Mavi
-    cardOther: "#3a0ca3",  // Mor tonu
-    textPrimary: "#ffffff",
-    textSecondary: "#979dac",
-    accent: "#4cc9f0",     // Turkuaz vurgu
-    border: "#243b53"
-  },
-  midnight_purple: {
-    name: "Minimalist Siyah & Beyaz",
-    bgMain: "#000000",
-    bgSidebar: "#0a0a0a",
-    bgChat: "#000000",
-    cardMe: "#ffffff",     // Net Beyaz (Sizin mesaj)
-    cardOther: "#1f1f1f",  // Koyu Siyah/Gri (Karşı taraf)
-    textPrimary: "#ffffff",
-    textSecondary: "#a1a1aa",
-    accent: "#38bdf8",     // Açık Mavi detay
-    border: "#27272a"
-  },
-  sunset_glow: {
-    name: "Şık Turkuaz Gece",
-    bgMain: "#0f172a",
-    bgSidebar: "#1e293b",
-    bgChat: "#0f172a",
-    cardMe: "#06b6d4",     // Turkuaz
-    cardOther: "#334155",  // Slate Gri
-    textPrimary: "#f8fafc",
-    textSecondary: "#94a3b8",
-    accent: "#8b5cf6",     // Mor
-    border: "#334155"
-  }
-};
+export interface MeshPeer {
+  id: string;
+  name: string;
+  username: string;
+  distanceMeters: number;
+  signalStrength: number;
+  battery: number;
+  status: EmergencyStatus;
+  lastSeenSec: number;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  username: string;
+  phone: string;
+  hidePhone: boolean;
+  phonePrivacy: PhonePrivacySetting;
+  lastSeenPrivacy: 'everyone' | 'contacts' | 'nobody';
+  readReceipts: boolean;
+  avatar: string;
+  bio: string;
+  isOnline: boolean;
+  lastSeenTime: string;
+  isNearbyVisible?: boolean;
+  locationPermission?: LocationPermissionState;
+}
+
+export interface NearbyUser {
+  user: User;
+  distanceMeters: number;
+  distanceText: string;
+  isWaved: boolean;
+}
+
+export interface NearbyGroup {
+  id: string;
+  name: string;
+  distanceText: string;
+  memberCount: number;
+  description: string;
+}
+
+export type MessageType = 'text' | 'image' | 'voice' | 'file';
+export type MessageStatus = 'sent' | 'delivered' | 'read';
+
+export interface Message {
+  id: string;
+  chatId: string;
+  senderId: string;
+  text: string;
+  timestamp: string;
+  fullDate?: string;
+  status: MessageStatus;
+  type: MessageType;
+  mediaUrl?: string;
+  audioDuration?: number;
+  fileName?: string;
+  fileSize?: string;
+  replyTo?: {
+    id: string;
+    senderName: string;
+    text: string;
+  };
+  isStarred?: boolean;
+}
+
+export interface Chat {
+  id: string;
+  isGroup: boolean;
+  name: string;
+  avatar: string;
+  participantIds: string[];
+  unreadCount: number;
+  isPinned: boolean;
+  isArchived: boolean;
+  isMuted: boolean;
+  mutedUntil?: string;
+  isBlocked: boolean;
+  disappearingMessages: 'off' | '24h' | '7d' | '90d';
+  lastMessage?: Message;
+  draftMessage?: string;
+}
+
+export interface CallRecord {
+  id: string;
+  contactId: string;
+  contactName: string;
+  contactAvatar: string;
+  type: 'audio' | 'video';
+  direction: 'incoming' | 'outgoing' | 'missed';
+  timestamp: string;
+  duration?: string;
+}
+
+export interface StorySlide {
+  id: string;
+  mediaUrl: string;
+  caption?: string;
+  timestamp: string;
+}
+
+export interface UserStory {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatar: string;
+  slides: StorySlide[];
+  isViewed: boolean;
+  updatedAt: string;
+}

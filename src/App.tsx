@@ -6,7 +6,8 @@ import {
   CallRecord,
   UserStory,
   ActiveTab,
-  AppTheme
+  AppTheme,
+  AuthUser
 } from './types';
 import {
   INITIAL_USERS,
@@ -33,27 +34,48 @@ import { NearbyView } from './components/NearbyView';
 import { LocationPermissionModal } from './components/LocationPermissionModal';
 import { EmergencyMeshView } from './components/EmergencyMeshView';
 import { ThemeSelectorModal } from './components/ThemeSelectorModal';
+import { AuthModal } from './components/AuthModal';
 import { MessageSquare } from 'lucide-react';
 
 export default function App() {
-  // Sabit Modern Ayarlar (Apple/Android seçimi kaldırıldı)
   const [activeTab, setActiveTab] = useState<ActiveTab>('chats');
   const [currentTheme, setCurrentTheme] = useState<AppTheme>('cyber_neon');
   const [showThemeSelectorModal, setShowThemeSelectorModal] = useState(false);
 
-  // Core Data states
-  const [users, setUsers] = useState<User[]>(INITIAL_USERS);
-  const [currentUserId, setCurrentUserId] = useState<string>('user_me');
+  const [authUser, setAuthUser] = useState<AuthUser | null>(() => {
+    try {
+      const saved = localStorage.getItem('chattr_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const defaultUser: User = {
+    id: 'user_me',
+    name: authUser?.name || 'Kullanıcı',
+    username: authUser?.username || '@kullanici',
+    phone: authUser?.phone || '',
+    hidePhone: false,
+    phonePrivacy: 'everyone',
+    lastSeenPrivacy: 'everyone',
+    readReceipts: true,
+    avatar: authUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+    bio: authUser?.bio || 'ChatTR Kullanıcısı',
+    isOnline: true,
+    lastSeenTime: 'Şimdi'
+  };
+
+  const [users, setUsers] = useState<User[]>(INITIAL_USERS.length > 0 ? INITIAL_USERS : [defaultUser]);
+  const [currentUserId, setCurrentUserId] = useState<string>(users[0]?.id || 'user_me');
   const [chats, setChats] = useState<Chat[]>(INITIAL_CHATS);
   const [messagesMap, setMessagesMap] = useState<Record<string, Message[]>>(INITIAL_MESSAGES);
   const [calls, setCalls] = useState<CallRecord[]>(INITIAL_CALLS);
   const [stories, setStories] = useState<UserStory[]>(INITIAL_STORIES);
 
-  // Active interaction states
-  const [activeChatId, setActiveChatId] = useState<string | null>('chat_zeynep');
-  const [typingChatId, setTypingChatId] = useState<string | null>(null);
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [typingChatId] = useState<string | null>(null);
 
-  // Modals
   const [showNewChatModal, setShowNewChatModal] = useState(false);
   const [showContactInfo, setShowContactInfo] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
@@ -61,11 +83,9 @@ export default function App() {
   const [showProfileEdit, setShowProfileEdit] = useState(false);
   const [muteTargetChat, setMuteTargetChat] = useState<Chat | null>(null);
 
-  // Location permission states
   const [locationPermission, setLocationPermission] = useState<'not_prompted' | 'granted' | 'denied'>('not_prompted');
   const [showLocationPermissionModal, setShowLocationPermissionModal] = useState(false);
 
-  // Call simulation modal
   const [activeCall, setActiveCall] = useState<{
     isOpen: boolean;
     contact: User | null;
@@ -76,10 +96,9 @@ export default function App() {
     callType: 'audio'
   });
 
-  // Story viewer modal
   const [selectedStory, setSelectedStory] = useState<UserStory | null>(null);
 
-  const currentUser = users.find((u) => u.id === currentUserId) || users[0];
+  const currentUser = users.find((u) => u.id === currentUserId) || users[0] || defaultUser;
   const activeChat = chats.find((c) => c.id === activeChatId) || null;
 
   const getChatContact = (chat: Chat | null): User | undefined => {
@@ -158,68 +177,6 @@ export default function App() {
     setChats((prev) =>
       prev.map((c) => (c.id === activeChatId ? { ...c, lastMessage: newMessage } : c))
     );
-
-    setTimeout(() => {
-      setMessagesMap((prev) => {
-        const chatMsgs = prev[activeChatId] || [];
-        return {
-          ...prev,
-          [activeChatId]: chatMsgs.map((m) =>
-            m.id === newMessage.id ? { ...m, status: 'delivered' } : m
-          )
-        };
-      });
-    }, 600);
-
-    if (activeChat && !activeChat.isBlocked && !activeChat.isGroup && activeContact) {
-      setTimeout(() => {
-        setTypingChatId(activeChatId);
-
-        setTimeout(() => {
-          setTypingChatId(null);
-          const replyReplies = [
-            'Mesajını aldım! Harika görünüyor.',
-            'Kullanıcı adı üzerinden doğrudan iletişim kurabilmek çok pratik olmuş.',
-            'Telefon numaranı gizlemiş olman güvenlik açısından çok iyi bir adım.',
-            'Kesinlikle katılıyorum, birazdan detaylıca bakacağım 👍',
-            'Sohbet arayüzü tam WhatsApp gibi akıcı çalışıyor!'
-          ];
-          const randomReply = replyReplies[Math.floor(Math.random() * replyReplies.length)];
-
-          const replyTime = new Date().toLocaleTimeString('tr-TR', {
-            hour: '2-digit',
-            minute: '2-digit'
-          });
-
-          const contactReplyMsg: Message = {
-            id: `msg_reply_${Date.now()}`,
-            chatId: activeChatId,
-            senderId: activeContact.id,
-            text: randomReply,
-            timestamp: replyTime,
-            status: 'read',
-            type: 'text'
-          };
-
-          setMessagesMap((prev) => {
-            const currentMsgs = (prev[activeChatId] || []).map((m) => ({
-              ...m,
-              status: 'read' as const
-            }));
-            return {
-              ...prev,
-              [activeChatId]: [...currentMsgs, contactReplyMsg]
-            };
-          });
-
-          setChats((prev) =>
-            prev.map((c) =>
-              c.id === activeChatId ? { ...c, lastMessage: contactReplyMsg } : c
-            )
-          );
-        }, 1800);
-      }, 1000);
-    }
   };
 
   const handleDeleteMessage = (messageId: string) => {
@@ -481,9 +438,32 @@ export default function App() {
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#0B0F17] text-slate-100">
-      {/* Dual-pane WhatsApp / Telegram Tarzı Tam Ekran Düzeni */}
+      {!authUser && (
+        <AuthModal
+          onLogin={(user: AuthUser) => {
+            setAuthUser(user);
+            localStorage.setItem('chattr_user', JSON.stringify(user));
+            const newU: User = {
+              id: `user_${Date.now()}`,
+              name: user.name,
+              username: user.username,
+              phone: user.phone,
+              hidePhone: false,
+              phonePrivacy: 'everyone',
+              lastSeenPrivacy: 'everyone',
+              readReceipts: true,
+              avatar: user.avatar,
+              bio: user.bio,
+              isOnline: true,
+              lastSeenTime: 'Şimdi'
+            };
+            setUsers((prev) => [newU, ...prev]);
+            setCurrentUserId(newU.id);
+          }}
+        />
+      )}
+
       <div className="flex-1 flex h-full overflow-hidden">
-        {/* Sol Panel: Sohbet Listesi ve Navigasyon */}
         <div className="w-full md:w-[380px] lg:w-[420px] flex flex-col border-r border-slate-800 shrink-0 h-full bg-[#0B0F17]">
           <div className="flex-1 overflow-hidden flex flex-col">
             {renderTabContent()}
@@ -497,7 +477,6 @@ export default function App() {
           />
         </div>
 
-        {/* Sağ Panel: Aktif Sohbet Penceresi */}
         <div className="hidden md:flex flex-1 flex-col h-full bg-[#0B0F17] relative overflow-hidden">
           {activeChat ? (
             <ChatView
@@ -525,20 +504,16 @@ export default function App() {
                 <MessageSquare className="w-10 h-10 text-slate-400 stroke-1" />
               </div>
               <h3 className="text-xl font-bold text-slate-200">
-                SohbetApp Güvenli Mesajlaşma
+                ChatTR Güvenli Mesajlaşma
               </h3>
               <p className="text-xs text-slate-400 max-w-sm mt-1 leading-relaxed">
                 Mesaj göndermek veya almak için soldaki listeden bir sohbet seçin ya da yeni bir sohbet başlatın.
               </p>
-              <div className="mt-4 px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-400">
-                Uçtan uca şifreli ve gizlilik odaklı iletişim
-              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Global Modals */}
       <LocationPermissionModal
         isOpen={showLocationPermissionModal}
         onClose={() => setShowLocationPermissionModal(false)}
@@ -640,7 +615,7 @@ export default function App() {
           }
           setSelectedStory(null);
         }}
-        onReply={(storyId, reply) => {
+        onReply={(_storyId, reply) => {
           if (selectedStory) {
             const userChat = chats.find(
               (c) => !c.isGroup && c.participantIds.includes(selectedStory.userId)

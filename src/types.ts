@@ -144,3 +144,11 @@ export interface UserStory {
   isViewed: boolean;
   updatedAt: string;
 }
+export interface AuthUser {
+  id: string;
+  name: string;
+  username: string;
+  phone: string;
+  avatar: string;
+  bio: string;
+}

@@ -1,0 +1,12 @@
+{
+  "name": "SohbetApp - Güvenli Mesajlaşma",
+  "description": "WhatsApp tarzı modern sohbet uygulaması. Telefon numarası veya gizli kullanıcı adı ile iletişim, kişiyi sessize alma, engelleme, durum ve sesli/görüntülü görüşme özellikleri.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

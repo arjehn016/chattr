@@ -1,23 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
-  AlertTriangle,
   Radio,
   Volume2,
   VolumeX,
-  Battery,
   MapPin,
   Send,
   ShieldAlert,
-  Users,
   CheckCircle2,
-  Activity,
-  Flame,
-  HeartPulse,
-  Share2,
   Flashlight,
-  Signal,
-  X,
-  Compass
+  X
 } from 'lucide-react';
 import { User, EmergencyStatus, EmergencyBroadcast, MeshPeer } from '../types';
 import { startEmergencyWhistle, stopEmergencyWhistle } from '../utils/emergencyAudio';
@@ -30,109 +21,21 @@ interface EmergencyMeshViewProps {
 
 export const EmergencyMeshView: React.FC<EmergencyMeshViewProps> = ({
   currentUser,
-  onClose,
-  isApple
+  onClose
 }) => {
   const [isWhistleActive, setIsWhistleActive] = useState(false);
   const [isStrobeActive, setIsStrobeActive] = useState(false);
   const [myStatus, setMyStatus] = useState<EmergencyStatus>('safe');
   const [customMsg, setCustomMsg] = useState('');
   const [batteryLevel, setBatteryLevel] = useState(84);
-  const [bloodType, setBloodType] = useState('A Rh(+)');
+  const [bloodType] = useState('A Rh(+)');
   const [activeTab, setActiveTab] = useState<'feed' | 'sos' | 'peers'>('feed');
 
-  // Simulated live Mesh Broadcasts without internet/Wi-Fi
-  const [broadcasts, setBroadcasts] = useState<EmergencyBroadcast[]>([
-    {
-      id: 'emb_1',
-      senderId: 'user_zeynep',
-      senderName: 'Zeynep Demir',
-      username: 'zeynep_d',
-      status: 'safe',
-      message: 'Ben iyiyim! Ailemle birlikte toplanma alanındayız (Göztepe Parkı). İnternet yok ama mesh çalışıyor.',
-      coordinates: '40.9781° K, 29.0566° D',
-      batteryPercent: 78,
-      bloodType: '0 Rh(+)',
-      timestamp: 'Az önce',
-      hopCount: 1,
-      signalStrength: 92,
-      distanceMeters: 280
-    },
-    {
-      id: 'emb_2',
-      senderId: 'user_mehmet',
-      senderName: 'Mehmet Can',
-      username: 'mehmet_c',
-      status: 'under_rubble',
-      message: 'ACİL YARDIM! Rıhtım Cad. No:18, 2. kat merdiven boşluğu. 2 kişiyiz, bilincimiz açık.',
-      coordinates: '40.9912° K, 29.0254° D',
-      batteryPercent: 34,
-      bloodType: 'B Rh(+)',
-      timestamp: '3 dk önce',
-      hopCount: 2,
-      signalStrength: 65,
-      distanceMeters: 620
-    },
-    {
-      id: 'emb_3',
-      senderId: 'user_melis',
-      senderName: 'Melis Aydın',
-      username: 'melis_design',
-      status: 'medical_needed',
-      message: 'Acil ilk yardım çantası ve sargı bezi lazım. Moda sahildeyiz.',
-      coordinates: '40.9840° K, 29.0280° D',
-      batteryPercent: 55,
-      bloodType: 'A Rh(-)',
-      timestamp: '7 dk önce',
-      hopCount: 1,
-      signalStrength: 88,
-      distanceMeters: 450
-    }
-  ]);
+  // Başlangıçta boş bir yayın akışı (bot hesaplar temizlendi)
+  const [broadcasts, setBroadcasts] = useState<EmergencyBroadcast[]>([]);
 
-  // Simulated nearby mesh peer nodes
-  const [peers, setPeers] = useState<MeshPeer[]>([
-    {
-      id: 'p1',
-      name: 'Zeynep Demir',
-      username: 'zeynep_d',
-      distanceMeters: 280,
-      signalStrength: 92,
-      battery: 78,
-      status: 'safe',
-      lastSeenSec: 4
-    },
-    {
-      id: 'p2',
-      name: 'Burak Öztürk (Röle Cihazı)',
-      username: 'burak_dev',
-      distanceMeters: 420,
-      signalStrength: 85,
-      battery: 64,
-      status: 'safe',
-      lastSeenSec: 12
-    },
-    {
-      id: 'p3',
-      name: 'Mehmet Can',
-      username: 'mehmet_c',
-      distanceMeters: 620,
-      signalStrength: 65,
-      battery: 34,
-      status: 'under_rubble',
-      lastSeenSec: 18
-    },
-    {
-      id: 'p4',
-      name: 'AKUT Arama Kurtarma Düğümü',
-      username: 'akut_mesh_relay',
-      distanceMeters: 750,
-      signalStrength: 95,
-      battery: 98,
-      status: 'safe',
-      lastSeenSec: 2
-    }
-  ]);
+  // Başlangıçta boş mesh düğümleri listesi
+  const [peers, setPeers] = useState<MeshPeer[]>([]);
 
   // Battery API simulation
   useEffect(() => {
@@ -296,7 +199,7 @@ export const EmergencyMeshView: React.FC<EmergencyMeshViewProps> = ({
         )}
       </div>
 
-      {/* Critical Action Bar: "Ben İyiyim" + "Düdük Çal (Enkaz)" */}
+      {/* Critical Action Bar */}
       <div className="p-3 bg-slate-900/90 border-b border-slate-800 grid grid-cols-2 gap-2.5 shrink-0">
         <button
           type="button"
@@ -330,14 +233,14 @@ export const EmergencyMeshView: React.FC<EmergencyMeshViewProps> = ({
         </button>
       </div>
 
-      {/* Navigation Tabs (Feed / SOS Gönder / Yakın Düğümler) */}
+      {/* Navigation Tabs */}
       <div className="flex border-b border-slate-800 bg-slate-950 px-3 shrink-0">
         <button
           type="button"
           onClick={() => setActiveTab('feed')}
           className={`flex-1 py-2.5 text-xs font-semibold text-center border-b-2 transition-colors ${
             activeTab === 'feed'
-              ? 'border-cyan-400 text-cyan-300'
+              ? 'border-amber-400 text-amber-300'
               : 'border-transparent text-slate-400 hover:text-white'
           }`}
         >
@@ -359,7 +262,7 @@ export const EmergencyMeshView: React.FC<EmergencyMeshViewProps> = ({
           onClick={() => setActiveTab('peers')}
           className={`flex-1 py-2.5 text-xs font-semibold text-center border-b-2 transition-colors ${
             activeTab === 'peers'
-              ? 'border-emerald-400 text-emerald-300'
+              ? 'border-amber-400 text-amber-300'
               : 'border-transparent text-slate-400 hover:text-white'
           }`}
         >
@@ -371,72 +274,72 @@ export const EmergencyMeshView: React.FC<EmergencyMeshViewProps> = ({
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {activeTab === 'feed' && (
           <>
-            {/* Info Box */}
-            <div className="p-3 bg-cyan-950/40 border border-cyan-500/30 rounded-2xl text-xs text-cyan-200 flex items-start gap-2.5">
-              <Radio className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+            <div className="p-3 bg-amber-950/40 border border-amber-500/30 rounded-2xl text-xs text-amber-200 flex items-start gap-2.5">
+              <Radio className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
               <p className="leading-relaxed">
                 Bu mesajlar internet ve baz istasyonları çalışmasa dahi Bluetooth ve Wi-Fi Direct üzerinden cihazdan cihaza aktarılmaktadır.
               </p>
             </div>
 
-            {/* Broadcast Feed */}
-            {broadcasts.map((b) => {
-              const isDanger = b.status === 'under_rubble';
-              const isMedical = b.status === 'medical_needed';
-              const isSafe = b.status === 'safe';
+            {broadcasts.length === 0 ? (
+              <div className="py-16 text-center text-slate-500 px-6">
+                <Radio className="w-10 h-10 mx-auto text-slate-600 stroke-1 mb-2" />
+                <p className="text-sm font-semibold text-slate-400">Henüz yayın bulunmuyor</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  Yukarıdaki butonları kullanarak "Ben İyiyim" bildirimi yapabilir veya alttan mesaj gönderebilirsiniz.
+                </p>
+              </div>
+            ) : (
+              broadcasts.map((b) => {
+                const isDanger = b.status === 'under_rubble';
+                const isMedical = b.status === 'medical_needed';
 
-              return (
-                <div
-                  key={b.id}
-                  className={`p-3.5 rounded-3xl border transition-all ${
-                    isDanger
-                      ? 'bg-rose-950/50 border-rose-500/70 shadow-[0_0_20px_rgba(244,63,94,0.25)]'
-                      : isMedical
-                      ? 'bg-amber-950/50 border-amber-500/70 shadow-[0_0_20px_rgba(245,158,11,0.2)]'
-                      : 'bg-emerald-950/40 border-emerald-500/40'
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`w-3 h-3 rounded-full animate-ping ${
-                          isDanger ? 'bg-rose-500' : isMedical ? 'bg-amber-400' : 'bg-emerald-400'
-                        }`}
-                      />
-                      <span className="text-xs font-bold text-white">{b.senderName}</span>
-                      <span className="text-[10px] font-mono text-slate-400">@{b.username}</span>
+                return (
+                  <div
+                    key={b.id}
+                    className={`p-3.5 rounded-3xl border transition-all ${
+                      isDanger
+                        ? 'bg-rose-950/50 border-rose-500/70 shadow-[0_0_20px_rgba(244,63,94,0.25)]'
+                        : isMedical
+                        ? 'bg-amber-950/50 border-amber-500/70 shadow-[0_0_20px_rgba(245,158,11,0.2)]'
+                        : 'bg-emerald-950/40 border-emerald-500/40'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-white">{b.senderName}</span>
+                        <span className="text-[10px] font-mono text-slate-400">@{b.username}</span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
+                        <span>{b.timestamp}</span>
+                        <span>·</span>
+                        <span className="text-amber-400">{b.distanceMeters}m</span>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
-                      <span>{b.timestamp}</span>
-                      <span>·</span>
-                      <span className="text-cyan-400">{b.distanceMeters}m</span>
+                    <p className="text-xs text-slate-100 leading-relaxed font-medium">
+                      {b.message}
+                    </p>
+
+                    <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-400 font-mono">
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center gap-0.5">
+                          <MapPin className="w-3 h-3 text-amber-400" />
+                          {b.coordinates}
+                        </span>
+                        <span>·</span>
+                        <span className="text-amber-300">Kan: {b.bloodType}</span>
+                      </div>
+
+                      <div className="flex items-center gap-1 text-emerald-400">
+                        <span>Batarya: %{b.batteryPercent}</span>
+                      </div>
                     </div>
                   </div>
-
-                  <p className="text-xs text-slate-100 leading-relaxed font-medium">
-                    {b.message}
-                  </p>
-
-                  <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-400 font-mono">
-                    <div className="flex items-center gap-2">
-                      <span className="flex items-center gap-0.5">
-                        <MapPin className="w-3 h-3 text-cyan-400" />
-                        {b.coordinates}
-                      </span>
-                      <span>·</span>
-                      <span className="text-amber-300">Kan: {b.bloodType}</span>
-                    </div>
-
-                    <div className="flex items-center gap-1 text-emerald-400">
-                      <span>Batarya: %{b.batteryPercent}</span>
-                      <span>·</span>
-                      <span>{b.hopCount}. Sıçrama</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </>
         )}
 
@@ -523,29 +426,39 @@ export const EmergencyMeshView: React.FC<EmergencyMeshViewProps> = ({
               Doğrudan bağlı düğümler ({peers.length}):
             </p>
 
-            {peers.map((peer) => (
-              <div
-                key={peer.id}
-                className="p-3 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-between text-xs"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-cyan-950 border border-cyan-500/40 flex items-center justify-center font-bold text-cyan-300 shrink-0">
-                    {peer.name.charAt(0)}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-white font-semibold truncate">{peer.name}</p>
-                    <p className="text-[10px] text-slate-400 font-mono">
-                      Mesafe: ~{peer.distanceMeters}m · {peer.lastSeenSec} sn önce aktif
-                    </p>
-                  </div>
-                </div>
-
-                <div className="text-right shrink-0 font-mono text-[10px]">
-                  <span className="text-emerald-400 font-bold">%{peer.signalStrength} Sinyal</span>
-                  <p className="text-slate-400">Batarya: %{peer.battery}</p>
-                </div>
+            {peers.length === 0 ? (
+              <div className="py-16 text-center text-slate-500 px-6">
+                <Radio className="w-10 h-10 mx-auto text-slate-600 stroke-1 mb-2" />
+                <p className="text-sm font-semibold text-slate-400">Yakında aktif düğüm bulunamadı</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  Çevrede Bluetooth/Wi-Fi Direct açık başka bir chattr kullanıcısı algılandığında burada görünecektir.
+                </p>
               </div>
-            ))}
+            ) : (
+              peers.map((peer) => (
+                <div
+                  key={peer.id}
+                  className="p-3 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-between text-xs"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-amber-950 border border-amber-500/40 flex items-center justify-center font-bold text-amber-300 shrink-0">
+                      {peer.name.charAt(0)}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-white font-semibold truncate">{peer.name}</p>
+                      <p className="text-[10px] text-slate-400 font-mono">
+                        Mesafe: ~{peer.distanceMeters}m · {peer.lastSeenSec} sn önce aktif
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0 font-mono text-[10px]">
+                    <span className="text-emerald-400 font-bold">%{peer.signalStrength} Sinyal</span>
+                    <p className="text-slate-400">Batarya: %{peer.battery}</p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
       </div>
@@ -560,12 +473,12 @@ export const EmergencyMeshView: React.FC<EmergencyMeshViewProps> = ({
           value={customMsg}
           onChange={(e) => setCustomMsg(e.target.value)}
           placeholder="İnternetsiz çevreye acil mesaj yazın..."
-          className="flex-1 px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-full text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-400"
+          className="flex-1 px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-full text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-400"
         />
         <button
           type="submit"
           disabled={!customMsg.trim()}
-          className="w-10 h-10 rounded-full bg-cyan-500 hover:bg-cyan-400 disabled:opacity-40 text-black flex items-center justify-center transition-transform active:scale-95 shadow-md shadow-cyan-500/30"
+          className="w-10 h-10 rounded-full bg-amber-400 hover:bg-amber-300 disabled:opacity-40 text-slate-950 flex items-center justify-center transition-transform active:scale-95 shadow-md shadow-amber-400/20"
           title="Mesh Yayını Gönder"
         >
           <Send className="w-4 h-4 ml-0.5" />

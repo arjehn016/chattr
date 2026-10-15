@@ -7,10 +7,8 @@ import {
   Smartphone,
   EyeOff,
   UserCheck,
-  Palette,
   Radio,
-  ChevronRight,
-  LogOut
+  ChevronRight
 } from 'lucide-react';
 
 interface SettingsViewProps {
@@ -33,14 +31,11 @@ interface SettingsViewProps {
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
   currentUser,
-  allUsers,
-  onSwitchUser,
   onOpenPrivacyModal,
   onOpenBlockedModal,
   onOpenProfileEdit,
   onToggleHidePhone,
   blockedCount,
-  onOpenThemeSelector,
   onOpenEmergencyMesh
 }) => {
   return (
@@ -48,13 +43,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       {/* Header */}
       <div className="p-4 border-b border-slate-800 flex items-center justify-between sticky top-0 bg-[#0B0F17]/95 backdrop-blur-md z-10">
         <h1 className="text-xl font-bold">Ayarlar</h1>
-        <button
-          onClick={onOpenThemeSelector}
-          className="px-3 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-400 text-xs font-medium flex items-center gap-1.5 hover:bg-cyan-900/50 transition-colors"
-        >
-          <Palette className="w-3.5 h-3.5" />
-          <span>Tema Değiştir</span>
-        </button>
       </div>
 
       <div className="p-4 space-y-5">
@@ -67,34 +55,17 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             <img
               src={currentUser.avatar}
               alt={currentUser.name}
-              className="w-14 h-14 rounded-full object-cover border-2 border-cyan-500/40"
+              className="w-14 h-14 rounded-full object-cover border-2 border-amber-400/40"
             />
             <div>
               <h2 className="font-semibold text-base text-slate-100">{currentUser.name}</h2>
-              <p className="text-xs text-cyan-400 font-mono">
-                {currentUser.username} • {currentUser.hidePhone ? 'Gizli Numara' : currentUser.phone}
+              <p className="text-xs text-amber-400 font-mono">
+                {currentUser.hidePhone ? 'Gizli Numara' : currentUser.phone}
               </p>
               <p className="text-xs text-slate-400 mt-1 line-clamp-1">{currentUser.about || 'ChatTR kullanıyorum.'}</p>
             </div>
           </div>
           <ChevronRight className="w-5 h-5 text-slate-500" />
-        </div>
-
-        {/* Theme Card */}
-        <div
-          onClick={onOpenThemeSelector}
-          className="p-3.5 rounded-xl bg-slate-900/50 border border-slate-800 flex items-center justify-between cursor-pointer hover:bg-slate-800/40"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
-              <Palette className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-medium">Tema & Neon Renk Paleti</h3>
-              <p className="text-xs text-slate-400">Cyber neon, matris ve koyu modlar</p>
-            </div>
-          </div>
-          <ChevronRight className="w-4 h-4 text-slate-500" />
         </div>
 
         {/* Emergency Mesh */}
@@ -125,7 +96,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             className="p-3.5 rounded-xl bg-slate-900/50 border border-slate-800 flex items-center justify-between cursor-pointer"
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
+              <div className="w-9 h-9 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
                 <EyeOff className="w-5 h-5" />
               </div>
               <div>
@@ -137,7 +108,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               type="checkbox"
               checked={currentUser.hidePhone}
               onChange={() => {}}
-              className="w-5 h-5 accent-cyan-500 rounded cursor-pointer"
+              className="w-5 h-5 accent-amber-500 rounded cursor-pointer"
             />
           </div>
 
@@ -171,33 +142,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-500" />
-          </div>
-        </div>
-
-        {/* Profile Switcher (Simülasyon Testi) */}
-        <div className="space-y-2 pt-2">
-          <div className="px-1 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            Hesap Değiştir (Test Modu)
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            {allUsers.map((u) => (
-              <button
-                key={u.id}
-                onClick={() => onSwitchUser(u.id)}
-                className={`p-2.5 rounded-xl border text-left flex items-center gap-2.5 transition-all ${
-                  u.id === currentUser.id
-                    ? 'bg-cyan-950/40 border-cyan-500/50 text-cyan-300'
-                    : 'bg-slate-900/40 border-slate-800 text-slate-300 hover:border-slate-700'
-                }`}
-              >
-                <img src={u.avatar} alt={u.name} className="w-8 h-8 rounded-full object-cover" />
-                <div className="overflow-hidden">
-                  <div className="text-xs font-semibold truncate">{u.name}</div>
-                  <div className="text-[10px] text-slate-400 font-mono truncate">{u.username}</div>
-                </div>
-              </button>
-            ))}
           </div>
         </div>
       </div>

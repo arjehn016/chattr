@@ -7,16 +7,9 @@ import {
   CheckCheck,
   Plus,
   Mic,
-  Camera,
-  MoreVertical,
-  ShieldAlert,
-  Users,
-  Filter,
-  Radio,
-  Palette
+  Users
 } from 'lucide-react';
 import { Chat, User, DeviceOS, AppTheme } from '../types';
-import { THEMES } from '../themeStyles';
 
 interface ChatListProps {
   chats: Chat[];
@@ -41,21 +34,13 @@ export const ChatList: React.FC<ChatListProps> = ({
   activeChatId,
   onSelectChat,
   onOpenNewChat,
-  onOpenMuteModal,
-  onTogglePin,
-  onDeleteChat,
-  deviceOS,
-  currentTheme = 'cyber_neon',
-  onOpenThemeSelector,
-  onOpenEmergencyMesh
+  deviceOS
 }) => {
-  const theme = THEMES[currentTheme] || THEMES.cyber_neon;
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'unread' | 'groups'>('all');
 
   const isApple = deviceOS === 'apple';
 
-  // Helper to get contact user for 1-on-1 chat
   const getContactForChat = (chat: Chat): User | undefined => {
     if (chat.isGroup) return undefined;
     const otherId = chat.participantIds.find((id) => id !== currentUser.id);
@@ -66,7 +51,6 @@ export const ChatList: React.FC<ChatListProps> = ({
     const contact = getContactForChat(chat);
     const search = searchTerm.toLowerCase().trim();
 
-    // Text search
     const matchesName = chat.name.toLowerCase().includes(search);
     const matchesUsername = contact?.username.toLowerCase().includes(search.replace(/^@/, '')) || false;
     const matchesPhone = (!contact?.hidePhone && contact?.phone.replace(/\D/g, '').includes(search.replace(/\D/g, ''))) || false;
@@ -81,7 +65,6 @@ export const ChatList: React.FC<ChatListProps> = ({
     return true;
   });
 
-  // Sort pinned first
   const sortedChats = [...filteredChats].sort((a, b) => {
     if (a.isPinned && !b.isPinned) return -1;
     if (!a.isPinned && b.isPinned) return 1;
@@ -89,18 +72,16 @@ export const ChatList: React.FC<ChatListProps> = ({
   });
 
   return (
-    <div className={`flex-1 flex flex-col h-full ${theme.bgClass} select-none overflow-hidden text-white`}>
+    <div className="flex-1 flex flex-col h-full bg-[#0B0F17] select-none overflow-hidden text-white">
       {/* Top Header */}
-      <header
-        className={`px-3.5 py-3 shrink-0 flex items-center justify-between border-b ${theme.headerClass}`}
-      >
+      <header className="px-3.5 py-3 shrink-0 flex items-center justify-between border-b border-slate-800 bg-[#0B0F17]">
         <div className="flex items-center gap-2">
           <h1 className="text-lg font-bold tracking-tight text-white flex items-center gap-1.5">
             Sohbetler
           </h1>
           {currentUser.hidePhone && (
             <span
-              className="text-[10px] px-2 py-0.5 rounded-full font-mono bg-cyan-950/80 text-cyan-300 border border-cyan-500/30"
+              className="text-[10px] px-2 py-0.5 rounded-full font-mono bg-amber-950/80 text-amber-300 border border-amber-500/30"
               title="Numaranız gizli, yalnızca kullanıcı adınızla bulunabilirsiniz"
             >
               Gizli Profil
@@ -109,35 +90,10 @@ export const ChatList: React.FC<ChatListProps> = ({
         </div>
 
         <div className="flex items-center gap-1.5">
-          {/* Emergency Disaster Mesh Button */}
-          {onOpenEmergencyMesh && (
-            <button
-              type="button"
-              onClick={onOpenEmergencyMesh}
-              className="px-2.5 py-1 rounded-full bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/40 text-[11px] font-bold flex items-center gap-1 transition-all active:scale-95 shadow-[0_0_12px_rgba(244,63,94,0.3)] animate-pulse"
-              title="İnternetsiz Afet & Deprem Ağı"
-            >
-              <Radio className="w-3.5 h-3.5 text-rose-400" />
-              <span>Afet Ağı</span>
-            </button>
-          )}
-
-          {/* Theme Palette Button */}
-          {onOpenThemeSelector && (
-            <button
-              type="button"
-              onClick={onOpenThemeSelector}
-              className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-cyan-300 transition-colors"
-              title="Tema & Neon Renk Seçimi"
-            >
-              <Palette className="w-4 h-4" />
-            </button>
-          )}
-
           <button
             type="button"
             onClick={onOpenNewChat}
-            className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform active:scale-95 ${theme.accentColor} ${theme.neonGlow}`}
+            className="w-8 h-8 rounded-full flex items-center justify-center transition-transform active:scale-95 bg-amber-400 text-slate-950 shadow-lg shadow-amber-400/20"
             title="Yeni Sohbet Başlat"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
@@ -146,7 +102,7 @@ export const ChatList: React.FC<ChatListProps> = ({
       </header>
 
       {/* Search Bar */}
-      <div className="p-3 bg-transparent border-b border-white/5 shrink-0">
+      <div className="p-3 bg-transparent border-b border-slate-800 shrink-0">
         <div className="relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
           <input
@@ -154,7 +110,7 @@ export const ChatList: React.FC<ChatListProps> = ({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="İsim, @kullanıcı_adı veya telefon..."
-            className={`w-full pl-10 pr-4 py-2.5 rounded-full text-xs placeholder:text-slate-500 focus:outline-none transition-all ${theme.inputPill}`}
+            className="w-full pl-10 pr-4 py-2.5 rounded-full text-xs bg-slate-900/80 border border-slate-800 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-amber-400/50 transition-all"
           />
         </div>
 
@@ -171,8 +127,8 @@ export const ChatList: React.FC<ChatListProps> = ({
               onClick={() => setFilterType(flt.id as any)}
               className={`px-3.5 py-1 text-xs rounded-full transition-all whitespace-nowrap shrink-0 ${
                 filterType === flt.id
-                  ? `${theme.accentColor} ${theme.neonGlow} font-semibold shadow-xs`
-                  : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
+                  ? 'bg-amber-400 text-slate-950 font-semibold shadow-md shadow-amber-400/20'
+                  : 'bg-slate-900/60 text-slate-400 hover:text-white hover:bg-slate-800'
               }`}
             >
               {flt.label}
@@ -203,12 +159,11 @@ export const ChatList: React.FC<ChatListProps> = ({
                 onClick={() => onSelectChat(chat.id)}
                 className={`p-3 rounded-2xl flex items-center gap-3 cursor-pointer transition-all relative group border ${
                   isSelected
-                    ? `${theme.cardClass} ring-1 ring-cyan-400/40 ${theme.neonGlow}`
-                    : 'border-transparent hover:bg-white/5 hover:border-white/10'
+                    ? 'bg-slate-900/90 border-amber-400/40 shadow-lg shadow-amber-400/5'
+                    : 'border-transparent hover:bg-slate-900/40 hover:border-slate-800'
                 }`}
               >
-                {/* Avatar with Status indicator */}
-                <div className="relative w-12 h-12 rounded-full bg-slate-800 shrink-0 overflow-hidden flex items-center justify-center font-bold text-slate-200 border border-white/10">
+                <div className="relative w-12 h-12 rounded-full bg-slate-800 shrink-0 overflow-hidden flex items-center justify-center font-bold text-slate-200 border border-slate-700">
                   {chat.avatar ? (
                     <img
                       src={chat.avatar}
@@ -217,30 +172,29 @@ export const ChatList: React.FC<ChatListProps> = ({
                       referrerPolicy="no-referrer"
                     />
                   ) : chat.isGroup ? (
-                    <div className="w-full h-full bg-cyan-600 text-white flex items-center justify-center">
+                    <div className="w-full h-full bg-amber-600 text-white flex items-center justify-center">
                       <Users className="w-6 h-6" />
                     </div>
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-tr from-cyan-600 to-indigo-600 text-white flex items-center justify-center text-lg">
+                    <div className="w-full h-full bg-gradient-to-tr from-amber-600 to-slate-700 text-white flex items-center justify-center text-lg">
                       {chat.name.charAt(0)}
                     </div>
                   )}
 
                   {contact?.isOnline && !isBlocked && (
-                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-black rounded-full shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-slate-950 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
                   )}
                 </div>
 
-                {/* Content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1 mb-1">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <span className={`text-sm font-semibold truncate ${theme.textPrimary}`}>
+                      <span className="text-sm font-semibold truncate text-slate-100">
                         {chat.name}
                       </span>
                       {contact?.hidePhone && (
                         <span
-                          className="text-[10px] bg-cyan-950/70 text-cyan-300 border border-cyan-500/30 px-1.5 py-0.2 rounded-full font-mono shrink-0"
+                          className="text-[10px] bg-amber-950/70 text-amber-300 border border-amber-500/30 px-1.5 py-0.2 rounded-full font-mono shrink-0"
                           title="Telefon gizli, sadece @kullaniciadi ile iletişim"
                         >
                           @{contact.username}
@@ -250,7 +204,7 @@ export const ChatList: React.FC<ChatListProps> = ({
 
                     <span
                       className={`text-[11px] font-mono shrink-0 ${
-                        chat.unreadCount > 0 ? 'text-cyan-400 font-semibold' : 'text-slate-400'
+                        chat.unreadCount > 0 ? 'text-amber-400 font-semibold' : 'text-slate-400'
                       }`}
                     >
                       {chat.lastMessage?.timestamp || ''}
@@ -258,12 +212,11 @@ export const ChatList: React.FC<ChatListProps> = ({
                   </div>
 
                   <div className="flex items-center justify-between gap-2">
-                    <div className={`flex items-center gap-1 text-xs truncate ${theme.textSecondary}`}>
-                      {/* Read status ticks */}
+                    <div className="flex items-center gap-1 text-xs truncate text-slate-400">
                       {chat.lastMessage?.senderId === currentUser.id && (
                         <span className="shrink-0">
                           {chat.lastMessage.status === 'read' ? (
-                            <CheckCheck className="w-3.5 h-3.5 text-cyan-400" />
+                            <CheckCheck className="w-3.5 h-3.5 text-amber-400" />
                           ) : chat.lastMessage.status === 'delivered' ? (
                             <CheckCheck className="w-3.5 h-3.5 text-slate-400" />
                           ) : (
@@ -272,9 +225,8 @@ export const ChatList: React.FC<ChatListProps> = ({
                         </span>
                       )}
 
-                      {/* Voice or text snippet */}
                       {chat.lastMessage?.type === 'voice' ? (
-                        <span className="flex items-center gap-1 text-cyan-400 font-medium truncate">
+                        <span className="flex items-center gap-1 text-amber-400 font-medium truncate">
                           <Mic className="w-3.5 h-3.5" />
                           Sesli Mesaj ({chat.lastMessage.audioDuration || 15} sn)
                         </span>
@@ -289,16 +241,11 @@ export const ChatList: React.FC<ChatListProps> = ({
                       )}
                     </div>
 
-                    {/* Right badges: Pin, Mute, Unread count */}
                     <div className="flex items-center gap-1.5 shrink-0">
-                      {chat.isMuted && (
-                        <VolumeX className="w-3.5 h-3.5 text-slate-400" />
-                      )}
-                      {chat.isPinned && (
-                        <Pin className="w-3.5 h-3.5 text-cyan-400 rotate-45" />
-                      )}
+                      {chat.isMuted && <VolumeX className="w-3.5 h-3.5 text-slate-400" />}
+                      {chat.isPinned && <Pin className="w-3.5 h-3.5 text-amber-400 rotate-45" />}
                       {chat.unreadCount > 0 && (
-                        <span className="min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-black bg-cyan-400 flex items-center justify-center rounded-full shadow-[0_0_8px_rgba(6,182,212,0.8)]">
+                        <span className="min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-slate-950 bg-amber-400 flex items-center justify-center rounded-full shadow-[0_0_8px_rgba(250,204,21,0.8)]">
                           {chat.unreadCount}
                         </span>
                       )}
@@ -317,10 +264,10 @@ export const ChatList: React.FC<ChatListProps> = ({
           <button
             type="button"
             onClick={onOpenNewChat}
-            className={`w-14 h-14 rounded-full ${theme.accentColor} ${theme.neonGlow} text-white shadow-xl flex items-center justify-center active:scale-95 transition-transform`}
+            className="w-14 h-14 rounded-full bg-amber-400 text-slate-950 shadow-xl shadow-amber-400/20 flex items-center justify-center active:scale-95 transition-transform"
             title="Yeni Sohbet"
           >
-            <Plus className="w-6 h-6" />
+            <Plus className="w-6 h-6 stroke-[2.5]" />
           </button>
         </div>
       )}

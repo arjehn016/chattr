@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { 
-  Users, MessageSquare, Settings as SettingsIcon, Phone, Radio, 
-  Shield, UserPlus, Image as ImageIcon, Send, X, Camera, AtSign, User as UserIcon, Sparkles, Check,
-  Lock, UserX, Trash2, Bell, HelpCircle
+  Users, MessageSquare, Settings as SettingsIcon, Radio, 
+  Shield, UserPlus, Lock, Check, Trash2, Radar, Wifi, SlidersHorizontal, Eye, EyeOff
 } from 'lucide-react';
-import { User, Chat, Message, CallRecord, UserStory } from './types';
-import { INITIAL_USERS, INITIAL_CHATS, INITIAL_MESSAGES, INITIAL_CALLS, INITIAL_STORIES } from './mockData';
+import { User, Chat } from './types';
+import { INITIAL_USERS, INITIAL_CHATS } from './mockData';
 import { ProfileEditModal } from './components/ProfileEditModal';
 import { NewGroupModal } from './components/NewGroupModal';
 import { PrivacyModal } from './components/PrivacyModal';
@@ -29,16 +28,20 @@ export default function App() {
   });
 
   const [chats, setChats] = useState<Chat[]>(INITIAL_CHATS);
-  const [messages, setMessages] = useState<Record<string, Message[]>>(INITIAL_MESSAGES);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'chats' | 'contacts' | 'settings'>('chats');
+  const [activeTab, setActiveTab] = useState<'chats' | 'contacts' | 'nearby' | 'settings'>('chats');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isNewGroupModalOpen, setIsNewGroupModalOpen] = useState(false);
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
   const [hidePhone, setHidePhone] = useState(true);
   const [isApple, setIsApple] = useState(false);
 
-  // Eğer kullanıcı kayıtlı değilse doğrudan Kayıt Olma Ekranını göster
+  // Yakındakiler & Mesafe Filtresi ve Görünürlük State'leri
+  const [isDiscoverable, setIsDiscoverable] = useState(true);
+  const [searchRadius, setSearchRadius] = useState<number>(500);
+  const [nearbyUsers, setNearbyUsers] = useState<any[]>([]);
+  const [isScanning, setIsScanning] = useState(false);
+
   if (!currentUser) {
     return (
       <AuthScreen 
@@ -85,6 +88,19 @@ export default function App() {
     setCurrentUser(null);
   };
 
+  const startNearbyScan = () => {
+    if (!isDiscoverable) {
+      alert('Yakındakilerde görünmek istemediğiniz için tarama yapamazsınız. Önce görünürlüğü açın.');
+      return;
+    }
+
+    setIsScanning(true);
+    setTimeout(() => {
+      setIsScanning(false);
+      setNearbyUsers([]);
+    }, 2000);
+  };
+
   return (
     <div className="flex h-screen bg-[#0B0F17] text-slate-100 overflow-hidden font-sans">
       {/* Sol Navigasyon / Sekme Çubuğu */}
@@ -93,6 +109,7 @@ export default function App() {
           <button 
             onClick={() => setIsProfileModalOpen(true)}
             className="w-12 h-12 rounded-full bg-slate-900 border border-slate-700 overflow-hidden flex items-center justify-center font-bold text-amber-400 hover:border-amber-400 transition-all shadow-md"
+            title="Profilim"
           >
             {currentUser.avatar ? (
               <img src={currentUser.avatar} alt={currentUser.name} className="w-full h-full object-cover" />
@@ -116,6 +133,14 @@ export default function App() {
               title="Kişiler"
             >
               <Users className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => setActiveTab('nearby')}
+              className={`p-3 rounded-2xl transition-all ${activeTab === 'nearby' ? 'bg-amber-400 text-slate-950 shadow-lg shadow-amber-400/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'}`}
+              title="Yakındakileri Gör"
+            >
+              <Radar className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -142,7 +167,6 @@ export default function App() {
       {/* Ana İçerik Alanı */}
       <div className="flex-1 flex overflow-hidden">
         <div className="w-80 border-r border-slate-800 bg-[#07090E] flex flex-col">
-          {/* Üst Kısım: Logomuz ve Başlık */}
           <div className="p-4 border-b border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 font-bold shadow-inner">
@@ -153,7 +177,7 @@ export default function App() {
               </h1>
             </div>
             <span className="text-xs font-semibold text-slate-400 capitalize">
-              {activeTab === 'chats' ? 'Sohbetler' : activeTab === 'contacts' ? 'Kişiler' : 'Ayarlar'}
+              {activeTab === 'chats' ? 'Sohbetler' : activeTab === 'contacts' ? 'Kişiler' : activeTab === 'nearby' ? 'Yakındakiler' : 'Ayarlar'}
             </span>
           </div>
 
@@ -161,7 +185,7 @@ export default function App() {
             {activeTab === 'chats' && (
               chats.length === 0 ? (
                 <div className="text-center py-12 text-slate-500 text-xs">
-                  Henüz bir sohbet yok.<br/>Yeni grup kurabilir veya kişilerden mesaj başlatabilirsiniz.
+                  Henüz sohbetiniz yok.<br/>Yeni grup kurabilir veya kişilerden mesaj başlatabilirsiniz.
                 </div>
               ) : (
                 chats.map(chat => (
@@ -180,7 +204,7 @@ export default function App() {
             {activeTab === 'contacts' && (
               INITIAL_USERS.length === 0 ? (
                 <div className="text-center py-12 text-slate-500 text-xs">
-                  Kayıtlı kişi bulunmuyor.
+                  Henüz ekli kişi yok.
                 </div>
               ) : (
                 INITIAL_USERS.map(u => (
@@ -192,9 +216,90 @@ export default function App() {
               )
             )}
 
+            {activeTab === 'nearby' && (
+              <div className="space-y-3">
+                <div className="p-3 rounded-2xl bg-slate-900 border border-slate-800 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {isDiscoverable ? <Eye className="w-4 h-4 text-amber-400" /> : <EyeOff className="w-4 h-4 text-slate-500" />}
+                      <span className="text-xs font-semibold text-slate-200">Yakındakilerde Görün</span>
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      checked={isDiscoverable} 
+                      onChange={(e) => setIsDiscoverable(e.target.checked)}
+                      className="w-4 h-4 accent-amber-400 cursor-pointer"
+                    />
+                  </div>
+                  <p className="text-[10px] text-slate-400">
+                    {isDiscoverable ? 'Aktifsiniz: Diğer açık kullanıcılar sizi görebilir.' : 'Gizlisiniz: Kimse sizi taramada göremez.'}
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-slate-900 border border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-300 font-semibold flex items-center gap-1.5">
+                      <SlidersHorizontal className="w-3.5 h-3.5 text-amber-400" />
+                      Arama Mesafesi
+                    </span>
+                    <span className="text-amber-400 font-mono font-bold">
+                      {searchRadius >= 1000 ? `${searchRadius / 1000} km` : `${searchRadius} metre`}
+                    </span>
+                  </div>
+                  <select 
+                    value={searchRadius} 
+                    onChange={(e) => setSearchRadius(Number(e.target.value))}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-400"
+                  >
+                    <option value={100}>100 Metre</option>
+                    <option value={250}>250 Metre</option>
+                    <option value={500}>500 Metre</option>
+                    <option value={1000}>1 Kilometre</option>
+                    <option value={5000}>5 Kilometre</option>
+                  </select>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-amber-400/10 border border-amber-400/20 text-xs text-amber-300 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Wifi className={`w-4 h-4 shrink-0 ${isScanning ? 'animate-pulse text-amber-400' : ''}`} />
+                    <span>{isScanning ? 'Çevre taranıyor...' : 'Radar Hazır'}</span>
+                  </div>
+                  <button 
+                    onClick={startNearbyScan} 
+                    disabled={isScanning || !isDiscoverable}
+                    className="px-2.5 py-1 bg-amber-400 text-slate-950 font-bold rounded-lg text-[10px] hover:bg-amber-300 transition-all disabled:opacity-40"
+                  >
+                    {isScanning ? 'Taranıyor' : 'Tara'}
+                  </button>
+                </div>
+
+                {!isDiscoverable ? (
+                  <div className="text-center py-8 text-slate-500 text-xs">
+                    Görünürlüğünüz kapalı olduğu için tarama yapamazsınız.
+                  </div>
+                ) : nearbyUsers.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500 text-xs space-y-2">
+                    <Radar className="w-8 h-8 mx-auto text-slate-700 animate-spin stroke-[1]" />
+                    <p>Seçilen mesafede başka kullanıcı bulunamadı.</p>
+                  </div>
+                ) : (
+                  nearbyUsers.map(n => (
+                    <div key={n.id} className="p-3 rounded-2xl border border-slate-800 bg-slate-900/50 flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-sm text-slate-200">{n.name}</p>
+                        <p className="text-[10px] text-slate-400">Mesafe: {n.distance}</p>
+                      </div>
+                      <span className="text-[10px] px-2 py-1 bg-amber-400/10 text-amber-400 rounded-lg border border-amber-400/20 font-mono">
+                        {n.signal}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
             {activeTab === 'settings' && (
               <div className="space-y-3 pb-6">
-                {/* Profil Kartı */}
                 <div 
                   onClick={() => setIsProfileModalOpen(true)}
                   className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-amber-400/40 transition-all shadow-md"
@@ -216,7 +321,6 @@ export default function App() {
                   <p className="text-xs text-slate-400 mt-2.5 italic bg-slate-950/40 p-2 rounded-xl border border-slate-800/50">"{currentUser.bio}"</p>
                 </div>
 
-                {/* Gizlilik ve Güvenlik Menüleri */}
                 <div className="space-y-1.5 pt-2">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Gizlilik Ayarları</p>
                   
@@ -248,22 +352,8 @@ export default function App() {
                       </div>
                     </div>
                   </div>
-
-                  <div 
-                    onClick={() => alert("Engellenen kullanıcı listesi şu an boş.")}
-                    className="p-3 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between cursor-pointer hover:border-slate-700 transition-all"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <UserX className="w-4 h-4 text-amber-400" />
-                      <div>
-                        <p className="text-xs font-semibold text-slate-200">Engellenen Kişiler</p>
-                        <p className="text-[10px] text-slate-400">0 engellenen kullanıcı</p>
-                      </div>
-                    </div>
-                  </div>
                 </div>
 
-                {/* Hesap İşlemleri */}
                 <div className="space-y-1.5 pt-2">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Hesap</p>
                   
@@ -283,7 +373,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Sağ Sohbet Detay Ekranı */}
         <div className="flex-1 flex flex-col bg-[#0B0F17]">
           {activeChatId ? (
             <div className="flex-1 flex flex-col items-center justify-center text-slate-500 text-sm">
@@ -298,7 +387,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* Profil Düzenleme Modalı */}
+      {/* Modallar */}
       <ProfileEditModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
@@ -307,7 +396,6 @@ export default function App() {
         isApple={isApple}
       />
 
-      {/* Yeni Grup Kurma Modalı */}
       <NewGroupModal
         isOpen={isNewGroupModalOpen}
         onClose={() => setIsNewGroupModalOpen(false)}
@@ -316,7 +404,6 @@ export default function App() {
         onCreateGroup={handleCreateGroup}
       />
 
-      {/* Gizlilik ve Güvenlik Detay Modalı */}
       <PrivacyModal
         isOpen={isPrivacyModalOpen}
         onClose={() => setIsPrivacyModalOpen(false)}
